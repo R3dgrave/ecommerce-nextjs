@@ -71,7 +71,6 @@ export default function ProfilePage() {
                 <ProfileField label="Nombre" value={fullUser?.name} />
                 <ProfileField label="Correo Electrónico" value={fullUser?.email} />
                 <ProfileField label="Teléfono" value={fullUser?.phone || "No registrado"} />
-                <ProfileField label="Rol" value={fullUser?.isAdmin ? "Administrador" : "Cliente"} />
               </div>
             )}
           </section>

@@ -1,40 +1,31 @@
-import { productService } from '../services/productService';
-import { Hero } from '../components/home/Hero';
-import { FeaturedProducts } from '../components/products/FeaturedProducts';
-import { Product } from '../types/index';
-import Link from 'next/link';
+import { productService } from "../services/productService";
+import { categoryService } from "../services/categoryService";
+import { Hero } from "../components/home/Hero";
+import { ProductShowcase } from "../components/products/ProductShowcase";
 
 export default async function HomePage() {
-  let products: Product[] = [];
-  let error: string | null = null;
+  const [productsRes, categoriesRes] = await Promise.allSettled([
+    productService.getAllProducts(),
+    categoryService.getAllCategories(),
+  ]);
 
-  try {
-    const response = await productService.getAllProducts();
-    products = response?.data || [];
-  } catch {
-    error = "No pudimos conectar con el servidor en este momento.";
-  }
+  const products =
+    productsRes.status === "fulfilled" ? productsRes.value.data : [];
+  const categories =
+    categoriesRes.status === "fulfilled" ? categoriesRes.value : [];
 
   return (
-    <div className="flex flex-col gap-20 pb-20">
+    <div className="flex flex-col gap-12 pb-20">
       <Hero />
 
-      <section className="container mx-auto px-4">
-        <div className="flex justify-between flex-col md:flex-row md:items-end mb-12">
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tight">Destacados</h2>
-            <p className="text-gray-500 font-medium mt-2">Los favoritos de la comunidad TECHSTORE</p>
-          </div>
-          <Link
-            href="/products"
-            className="text-blue-600 font-bold hover:bg-blue-50 px-6 py-3 rounded-xl transition-colors"
-          >
-            Ver catálogo completo →
-          </Link>
-        </div>
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-black text-gray-900 mb-2">
+          Nuestro Catálogo
+        </h2>
+        <p className="text-gray-500 mb-8">Equipamiento premium para tu setup</p>
+      </div>
 
-        <FeaturedProducts products={products} error={error} />
-      </section>
+      <ProductShowcase initialProducts={products} categories={categories} />
     </div>
   );
 }

@@ -3,19 +3,39 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuthActions } from "@/src/hooks/useAuthActions";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { handleLogin, loading, error } = useAuthActions();
+  const reason = searchParams.get("reason");
+  const redirectPath = searchParams.get("redirect") || "/";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleLogin(email, password);
+    const result = await handleLogin(email, password);
+    if (result?.success) {
+      router.push(redirectPath);
+    }
   };
 
   return (
     <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-3xl shadow-xl border border-gray-50">
+      {reason === "auth_required" && (
+        <div className="mb-6 p-4 bg-blue-50 text-blue-700 text-sm font-bold rounded-xl border border-blue-100 animate-in fade-in zoom-in">
+          👋 ¡Hola! Por favor inicia sesión para guardar tus datos de envío y
+          completar la compra.
+        </div>
+      )}
+      {reason === "session_expired" && (
+        <div className="mb-6 p-4 bg-orange-50 text-orange-700 text-sm font-bold rounded-xl border border-orange-100">
+          Tu sesión ha expirado por seguridad. Ingresa nuevamente.
+        </div>
+      )}
+
       <div className="text-center mb-10">
         <h1 className="text-3xl font-black text-gray-900">Bienvenido</h1>
         <p className="text-gray-500 mt-2">

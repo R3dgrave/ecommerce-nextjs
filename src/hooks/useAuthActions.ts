@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { authService } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
-import { User } from '../types';
+import { useState } from "react";
+import { authService } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
+import { User } from "../types";
 
 export const useAuthActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login: contextLogin } = useAuth();
+  const { login: contextLogin, logout } = useAuth();
 
   const handleLogin = async (email: string, pass: string) => {
     setLoading(true);
@@ -16,7 +16,18 @@ export const useAuthActions = () => {
       contextLogin(data.user, data.token);
       return { success: true };
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      const msg =
+        err instanceof Error ? err.message : "Error al iniciar sesión";
+
+      if (
+        msg.toLowerCase().includes("token") ||
+        msg.toLowerCase().includes("expirado")
+      ) {
+        logout();
+        window.location.href = "/login?reason=session_expired";
+        return { success: false };
+      }
+
       setError(msg);
       return { success: false, message: msg };
     } finally {
@@ -24,7 +35,9 @@ export const useAuthActions = () => {
     }
   };
 
-  const handleRegister = async (userData: Partial<User> & { password?: string }) => {
+  const handleRegister = async (
+    userData: Partial<User> & { password?: string }
+  ) => {
     setLoading(true);
     setError(null);
     try {
@@ -34,7 +47,7 @@ export const useAuthActions = () => {
       }
       return { success: true };
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al crear cuenta';
+      const msg = err instanceof Error ? err.message : "Error al crear cuenta";
       setError(msg);
       return { success: false, message: msg };
     } finally {

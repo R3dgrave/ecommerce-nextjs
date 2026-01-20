@@ -63,21 +63,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
 
+  const updateQuantity = useCallback((productId: string, amount: number) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id === productId) {
+          const newQuantity = item.quantity + amount;
+          return { ...item, quantity: Math.max(1, newQuantity) };
+        }
+        return item;
+      })
+    );
+  }, []);
+
   const value = useMemo(
     () => ({
       cart,
       addToCart,
       removeFromCart,
       cartCount,
+      updateQuantity,
     }),
-    [cart, addToCart, removeFromCart, cartCount]
+    [cart, addToCart, removeFromCart, cartCount, updateQuantity]
   );
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = (): CartContextType => {

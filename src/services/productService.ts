@@ -3,9 +3,14 @@ import { PaginatedResponse, Product } from "../types/index";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const productService = {
-  async getAllProducts(): Promise<PaginatedResponse<Product>> {
+  async getAllProducts(category?: string): Promise<PaginatedResponse<Product>> {
     try {
-      const response = await fetch(`${API_URL}/product`, {
+      const url = new URL(`${API_URL}/product`);
+      if (category && category !== "Todas") {
+        url.searchParams.append("category", category);
+      }
+
+      const response = await fetch(url.toString(), {
         cache: "no-store",
       });
 
